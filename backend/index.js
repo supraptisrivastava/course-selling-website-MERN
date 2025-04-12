@@ -27,8 +27,26 @@ app.use(fileUpload({
 //     allowedHeaders: ["Content-Type", "Authorization"],
 // }));
 // app.options("*", cors());/
+// app.use(cors({
+//   origin: process.env.FRONTEND_URL, 
+//   credentials: true,
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+// }));
+const allowedOrigins = [
+  "https://course-selling-website-mern.vercel.app",
+  "https://course-selling-website-mern-mo0xy2l99.vercel.app"
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL, 
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow mobile apps or Postman
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -36,7 +54,7 @@ app.use(cors({
 
 // Explicitly handle OPTIONS requests to prevent blocking actual requests
 app.options("*", (req, res) => {
-  res.set("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  res.set("Access-Control-Allow-Origin", req.headers.origin);
   res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.set("Access-Control-Allow-Credentials", "true");
